@@ -1,84 +1,86 @@
 import sys
 from datetime import datetime
-import pickle
+import json
 import os
 from pathlib import Path
+from dateutil import parser
 
 path = os.path.dirname(__file__)
-objetivos = {}
+with open("objectives.json") as f:
+    json_data = json.load(f)
+    objectives = json_data["objectives"]    
 
 while True:
-    respuesta = input(
+    answer = input(
         "Elige que quieres hacer:\n1. Añadir objetivo\n2. Ver objetivos pendientes\n3. Eliminar objetivo\n4. Salir\n")
 
-    if respuesta == '1':
-        nuevo_objetivo = input("\nInserta aquí el nombre del objetivo: ")
+    if answer == '1':
 
-        # Asignamos a cada objetivo una hora de inicio
-        hora_inicio = datetime.now()
-        objetivos[nuevo_objetivo] = hora_inicio
+        name = input("\nInserta aquí el nombre del objetivo: ")
+        start_date = str(datetime.now())
+        objectives.append({"name": name, "start_date": start_date})
 
         print("-----------------------------------------")
         print("Tu objetivo se ha añadido correctamente!")
         print("-----------------------------------------")
 
-        # Guardamos el objetivo con su fecha de inicio en un archivo al que podremos acceder mas tarde
-        with open(Path(path, "objetivos"), "wb") as f:
-            pickle.dump(objetivos, f)
+        with open(Path(path, "objectives.json"), "w") as f:
+            json.dump(json_data, f,  indent=2)
             f.close()
 
-    if respuesta == '2':
+    if answer == '2':
        # Accedemos al archivo donde están almacenados los objetivos
-        with open(Path(path, "objetivos"), "rb") as f:
-            objetivos = pickle.load(f)
+        with open(Path(path, "objectives.json")) as f:
+            json_data = json.load(f)
+            objectives = json_data["objectives"]    
 
         print("")
 
         # Hacemos operaciones para devolverle al usuario cuanto tiempo ha transcurrido desde que inicio el objetivo
-        for objetivo in objetivos:
+        for objective in objectives:
+            start_date = parser.parse(objective["start_date"])
             hora_actual = datetime.now()
-            tiempo_transcurrido = hora_actual - objetivos[objetivo]
+            tiempo_transcurrido = hora_actual - start_date
             dias, segundos = tiempo_transcurrido.days, tiempo_transcurrido.seconds
             horas = dias * 24 + segundos // 3600
             minutos = segundos % 3600 // 60
             segundos = segundos % 60
 
             print("- %s: %s dias %s:%s:%s" %
-                  (objetivo, dias, horas, minutos, segundos))
+                  (objective["name"], dias, horas, minutos, segundos))
         print("")
 
-    if respuesta == '3':
+    if answer == '3':
 
         bandera = 1
-        with open(Path(path, "objetivos"), "rb") as f:
-            objetivos = pickle.load(f)
+        with open(Path(path, "objectives.json"), "r") as f:
+            json_data = json.load(f)
+            objectives = json_data["objectives"]
 
         print("Que objetivo quieres eliminar:")
-        for objetivo in objetivos:
-            print(str(bandera) + ". " + objetivo)
+        for objective in objectives:
+            print(str(bandera) + ". " + str(objective['name']))
             bandera = bandera + 1
-        print(str(bandera + 1) + ". Atrás")
-        respuesta = input()
 
-        for objetivo in list(objetivos):
-            if respuesta == objetivo:
-                objetivos.pop(objetivo)
+        print(str(bandera) + ". Atrás")
+        answer = input()
+
+        bandera = 0
+        for i in objectives:
+            print(objectives)
+            if int(answer) == bandera + 1:
+                deleted_objective = objectives[bandera]["name"]
+                del objectives[bandera]
+                        
                 print("-----------------------------------------")
-                print("El objetivo <<%s>> ha sido eliminado!" % objetivo)
+                print("El objetivo <<%s>> ha sido eliminado!" % deleted_objective) 
                 print("-----------------------------------------")
-        
+            ++bandera   
+                
         # Guardamos el objetivo con su fecha de inicio en un archivo al que podremos acceder mas tarde
-        with open(Path(path, "objetivos"), "wb") as f:
-            pickle.dump(objetivos, f)
+        with open(Path(path, "objectives.json"), "w") as f:
+            json.dump(json_data, f,  indent=2)
             f.close()
 
-
-    if respuesta == '4':
+    if answer == '4':
         sys.exit()
-
-    with open(Path(path, "objetivos"), "wb") as f:
-        pickle.dump(objetivos, f)
-        f.close()
-    # Accedemos al archivo donde están almacenados los objetivos
-    with open(Path(path, "objetivos"), "rb") as f:
-        objetivos = pickle.load(f)
