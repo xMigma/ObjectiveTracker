@@ -20,11 +20,11 @@ class Objectives:
     def obtain_date(self, objectives):
         for self.objective in objectives:
             self.start_date = parser.parse(self.objective["start_date"])
-            self.hora_actual = datetime.now()         
-            self.tiempo_transcurrido = self.hora_actual - self.start_date
-            self.dias, self.segundos = self.tiempo_transcurrido.days, self.tiempo_transcurrido.seconds
-            self.horas =self.dias * 24 + self.segundos // 3600
-            self.minutos = self.segundos % 3600 // 60
-            self.segundos = self.segundos % 60
+            self.actual_date = datetime.now()         
+            self.time_elapsed = self.actual_date - self.start_date
+            self.days, self.seconds = self.time_elapsed.days, self.time_elapsed.seconds
+            self.hours =self.days * 24 + self.seconds // 3600
+            self.minutos = self.seconds % 3600 // 60
+            self.seconds = self.seconds % 60
 
-            print ("- %s: %s dias %s:%s:%s" % (self.objective["name"], self.dias, self.horas, self.minutos, self.segundos))
+            print ("- %s: %s dias %s:%s:%s" % (self.objective["name"], self.days, self.hours, self.minutos, self.seconds))
